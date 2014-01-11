@@ -1,0 +1,24 @@
+- name: remove useless socket configure
+  lineinfile:
+    dest=/etc/mysql/my.cnf
+    regexp='^socket.*sock'
+    state=absent
+
+- name: place configure
+  template: src=my.cnf.j2 dest={{ mysql56_root }}/etc/my.cnf owner=mysql group=mysql mode=0644
+
+- name: place mysql5.6 boot script
+  shell: cp {{ mysql56_root }}/support-files/mysql.server /etc/init.d/mysql.server
+
+- name: register mysql5.6 boot script
+  shell: update-rc.d mysql.server defaults
+
+- stat: path={{ mysql56_datadir }}/mysqld.pid
+  register: pid
+
+- name: init mysql
+  shell: sudo -u mysql {{ mysql56_root }}/scripts/mysql_install_db --user=mysql --datadir={{ mysql56_datadir }}
+  when: not pid.stat.exists
+
+- name: restart mysql
+  service: name=mysql.server state=restarted

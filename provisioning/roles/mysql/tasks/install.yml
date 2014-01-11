@@ -1,0 +1,61 @@
+- name: download mysql5.6.x deb package
+  get_url: url=http://cdn.mysql.com/Downloads/MySQL-5.6/mysql-5.6.14-debian6.0-x86_64.deb dest=/tmp/mysql-5.6.deb
+
+- name: install mysql5.6.x
+  shell: dpkg -i mysql-5.6.deb chdir=/tmp
+
+- name: remove mysql5.5 packages
+  apt: pkg={{ item }} state=absent
+  with_items:
+    - mysql-common
+    - mysql-server-5.5
+    - mysql-server-core-5.5
+    - mysql-client-5.5
+    - mysql-client-core-5.5
+
+- name: autoremove
+  shell: apt-get autoremove
+
+- name: remove old cnfs
+  file: path={{ item }} state=absent
+  with_items:
+    - /etc/my.cnf
+    - /etc/mysql/my.cnf
+
+- name: install dependant packages
+  apt: pkg={{ item }} update_cache=yes
+  with_items:
+    - libaio1
+    - python-mysqldb
+
+- name: add {{ mysql56_root }}/bin to path
+  lineinfile:
+    dest=/etc/environment
+    state=present
+    backrefs=yes
+    regexp='PATH=(["]*)((?!.*?{{ mysql56_root }}).*?)(["]*)$'
+    line="PATH=\1\2:{{ mysql56_root }}/bin\3"
+
+- name: add mysql group
+  group: name=mysql
+
+- name: add mysql user
+  user: name=mysql group=mysql system=yes
+
+- name: change owner ship
+  file: path={{ mysql56_root }} owner=mysql group=mysql
+
+- name: mkdir /etc/mysql/conf.d
+  shell: mkdir -p /etc/mysql/conf.d
+
+- name: init mysql dir
+  shell: install -o mysql -g mysql -d {{ mysql56_datadir }}
+
+- name: mkdir /etc
+  shell: sudo -u mysql mkdir -p {{ mysql56_root }}/etc
+
+- name: mkdir /log
+  shell: sudo -u mysql mkdir -p {{ mysql56_root }}/log
+
+- name: remove mysql5.5 boot script
+  shell: update-rc.d -f mysql remove

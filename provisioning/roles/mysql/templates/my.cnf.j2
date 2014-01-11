@@ -1,0 +1,19 @@
+[client]
+port = {{ mysql56_port }}
+socket = {{ mysql56_socket }}
+
+[mysqld]
+port = {{ mysql56_port }}
+pid-file = {{ mysql56_datadir }}/mysqld.pid
+socket = {{ mysql56_socket }}
+basedir = {{ mysql56_root }}
+datadir = {{ mysql56_datadir }}
+lc-messages-dir = {{ mysql56_root }}/share
+log-error = {{ mysql56_root }}/log
+character-set-server = utf8mb4
+default-storage-engine = InnoDB
+# explicit_defaults_for_timestamp = true
+# sql_mode=NO_ENGINE_SUBSTITUTION,STRICT_TRANS_TABLES
+
+[mysqldump]
+set-charset

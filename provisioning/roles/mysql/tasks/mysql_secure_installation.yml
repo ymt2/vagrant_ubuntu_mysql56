@@ -1,0 +1,6 @@
+- name: mysql_secure_installation
+  template: src=mysql_secure_installation.j2 dest=/tmp/mysql_secure_installation owner=root group=root mode=0600
+  when: mysql_root_password is defined and not pid.stat.exists
+  notify:
+    - launch mysql_secure_installation
+    - delete mysql_secure_installation

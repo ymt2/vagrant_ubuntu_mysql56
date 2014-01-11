@@ -1,0 +1,9 @@
+- name: launch mysql_secure_installation
+  shell: cat /tmp/mysql_secure_installation | {{ mysql56_root }}/bin/mysql_secure_installation
+  when: mysql_root_password is defined
+  environment:
+    PATH: "{{ mysql56_root }}/bin:usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+
+- name: delete mysql_secure_installation
+  file: dest=/tmp/mysql_secure_installation state=absent
+  when: mysql_root_password is defined
